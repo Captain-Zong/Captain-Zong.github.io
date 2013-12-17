@@ -4,10 +4,12 @@ title: Captain-Zong
 ---
 
 <h2>{{ page.title }}</h2>
-<p>my latest blogs </p>
+<p>啦拉拉啦 </p>
+<p>hahh {{ site.baseurl }}</p>
+
 <ul>
 	{% for post in site.posts %}
-	<p>hahh {{ site.baseurl }}</p>
+
 	<li>
 		{{ post.date | date_to_string }}
 		<a href="{{ site.baseurl }}{{ post.url }}">
