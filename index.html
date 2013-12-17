@@ -7,9 +7,10 @@ title: Captain-Zong
 <p>my latest blogs </p>
 <ul>
 	{% for post in site.posts %}
+	<p>{{ site.baseurl }}</p>
 	<li>
 		{{ post.date | date_to_string }}
-		<a href="{{ post.url }}">
+		<a href="{{ site.baseurl }}{{ post.url }}">
 			{{ post.title}}
 		</a>
 	</li>
