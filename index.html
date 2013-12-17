@@ -11,7 +11,7 @@ title: Captain-Zong
 	<p>hahh {{ post.url }}</p>
 	<li>
 		{{ post.date | date_to_string }}
-		<a href="/{{ post.url }}">
+		<a href="{{ post.url }}">
 			{{ post.title}}
 		</a>
 	</li>
