@@ -1,0 +1,490 @@
+<h2>ANSI Common Lisp Chapter2: Welcome to Lisp</h2>
+
+<h3>2.1 Form</h3>
+
+<p>lisp 表达式只有两种</p>
+
+<ul>
+<li>atoms 包括数字,字符串,符号</li>
+<li><p>list 一个括号,其中包括用空格隔开的0个或者多个表达式.</p>
+
+<p>  <code>(+ 2 3 4)</code>,<code>(/ (- 7 1) (- 4 2))</code>.均是有效的表达式.</p></li>
+</ul>
+
+
+<h3>2.2 Evaluation</h3>
+
+<h4>lisp 表达式求值规则</h4>
+
+<p>lisp 表达式求值过程如下,我们拿<code>(/ (- 7 1) (- 4 2))</code>举例.</p>
+
+<ol>
+<li>计算<code>(- 7 1)</code>: 7计算得到7,1计算得到1,然后7和1传递给函数<code>-</code>,计算得到6</li>
+<li>计算<code>(- 4 2)</code>: 4计算得到4,2计算得到2,然后4和2传递给函数<code>-</code>,计算得到2.</li>
+<li>6和2传递给函数<code>/</code>,计算得到3.</li>
+</ol>
+
+
+<p><strong>注意</strong>:不是所有的操作符都是函数.所以特殊的操作符不一定按照上面的规则进行求值.</p>
+
+<h4>操作符 quote</h4>
+
+<p>quote 操作符是一个特殊的操作符,不遵从上述求值规则,它的作用是,原封不动的返回它的参数.
+如</p>
+
+<pre><code>&gt;(quote (+ 3 5))
+(+ 3 5)
+</code></pre>
+
+<p>在 common lisp 中我们可以用<code>'</code>来表示 quote.</p>
+
+<pre><code>&gt;'(+ 2 1)
+(+ 2 1)
+</code></pre>
+
+<p>lisp 提供 quote 操作符作为防止表达式求值的一种方式.</p>
+
+<h3>2.3 data</h3>
+
+<p>lisp 提供的数据类型有</p>
+
+<ol>
+<li>integer 比如 256.求值等于自身.</li>
+<li>string 用双引号引起来的字符序列. 如 "hello wold".求值等于自身.</li>
+<li>symbols 即单词.忽略大小写,一般转化为大写.字符求值往往不得到自身,我们一般用quote引用.避免求值.</li>
+<li>list 如果不用 quote 引用,那么按照函数调用处理.想要表示一个 list,用 quote 引用之.</li>
+</ol>
+
+
+<h4>函数 list</h4>
+
+<p>可以通过调用 list 函数来构造一个 list.</p>
+
+<pre><code>&gt;(list 'my (+ 2 1) '(+ 2 1) "Sons")
+(MY 3 (+ 2 1) "Sons")
+</code></pre>
+
+<p>注意:list 的第一个元素是一个 symbol,忽略大小写,一般用大写展示,第二个元素是一个函数调用(2+1)的结果整数3,而第三个是一个 list 本身(用 quote 引用了),第四个元素是一个字符串,不忽略大小写.</p>
+
+<p><strong>lisp 其实就是在用 list 来编程</strong></p>
+
+<h4>空表</h4>
+
+<p>lisp 中有两种方式来表达空表.</p>
+
+<ol>
+<li>()</li>
+<li>nil. 求值等于自身,所以不用 quote 引用之.</li>
+</ol>
+
+
+<h3>2.4 List 操作</h3>
+
+<p>这里介绍了四个函数,分别是 cons,car,cdr,third.
+作用分别是cons:构造conses,car:获得第一个元素,cdr:获得剩余所有的元素(主意不一定是 list,和本身的构成方式有关),third:获得第三个元素.
+似乎除了 third 可以表达出这个意思之外,cons,car,cdr 都不能表达其作用,其实这么命名是有历史原因的,至于为什么,请看<a href="http://">cons car cdr 为什么这么命名</a>这篇文章.
+好,开始介绍这四个函数</p>
+
+<h5>函数 cons</h5>
+
+<p>cons 用于构造conses(注意不是表).接受两个参数.</p>
+
+<p>如果第二个参数是一个 list 的话,那么就将第一个元素加到表头.</p>
+
+<pre><code>&gt;(cons 'a '(b c d))
+(A B C D)
+</code></pre>
+
+<p>如果第二个参数仅仅是一个原子的话,就构造包含两个原子的表.</p>
+
+<pre><code>&gt;(cons 'a (cons 'b nil))
+(A B)
+</code></pre>
+
+<p>其实 list 函数就是一个 cons 的进阶版本.</p>
+
+<h4>函数 car cdr third</h4>
+
+<p>car 用于获得 list 的第一个元素,cdr 获得剩余所有的元素(主意不一定是 list,和本身的构成方式有关),third 获得第三个元素.</p>
+
+<pre><code>&gt;(car '(a b c))
+A
+&gt;(cdr '(a b)) //主意这是一个列表,和下面的表达式等价
+(B)
+&gt;(cdr (list 'a 'b))
+(B)
+&gt;(cdr (cons 'a 'b)) //主意这是一个 conses,不是一个列表
+B
+&gt;(third '(a b c d))
+C
+</code></pre>
+
+<h3>2.5 Truth</h3>
+
+<p>符号 t 表示真,t 和 nil 一样求值得到自身.
+实际上,除了 nil,() 在逻辑上均为真.</p>
+
+<h4>predicate</h4>
+
+<p>如果一个函数返回真假那么这个函数称之为 predicate 谓词.一般以函数名 p 结尾.</p>
+
+<h4>函数 listp</h4>
+
+<pre><code class="">&gt;(listp '(a b c))
+T
+&gt;(listp 27)
+NIL
+</code></pre>
+
+<h4>NIL</h4>
+
+<p>nil 即可以表示空表也可以表示假.</p>
+
+<h4>函数 null</h4>
+
+<p>判断list 是否为空表</p>
+
+<pre><code>&gt;(null nil)
+T
+</code></pre>
+
+<h4>函数 not</h4>
+
+<p>如果参数为真返回假,参数为真返回假.</p>
+
+<pre><code>&gt;(not nil)
+T
+&gt;(not 'a)
+NIL
+</code></pre>
+
+<h4>操作符 if</h4>
+
+<pre><code>(if test-exp 
+    then-exp 
+    else-exp)
+</code></pre>
+
+<p>如果 test 为真,执行并返回then-expression.如果为假,执行并返回 else-expression.最后一个 else-expression 可选,如果没有返回 nil</p>
+
+<pre><code>&gt;(if (listp '(a b c)) 
+    (+ １ 2)
+    (+ 5 6))
+3
+&gt;if( "any thing except nil or () is considered as true")
+    (+ 1 2)
+    (+ 5 6))
+11
+&gt;(if nil 1 )
+NIL
+</code></pre>
+
+<h4>逻辑操作符 and or</h4>
+
+<p>采用短路判断,参数不限.</p>
+
+<p>and:从左到右,一旦某个参数为假,立即返回 nil,否则返回最后一个表达式的值.</p>
+
+<p>or:从左到右,一旦某个参数为真,立即返回其值,否则返回 nil.</p>
+
+<pre><code>&gt;(and 1 (listp 27) t)
+NIL
+&gt;(or (listp 27) 1 t)
+1
+</code></pre>
+
+<p>注意,其实 and 和 or 都是宏.具体实现看第十章.</p>
+
+<h3>2.6 Functions</h3>
+
+<h4>自定义函数 defun</h4>
+
+<pre><code>(defun func-name list-of-params expression expression ...)
+</code></pre>
+
+<p>自定义函数包括至少三个参数,一个函数名,一个参数列表,若干表达式构成的函数体.</p>
+
+<p>defun 返回函数名.调用函数时,<strong>返回最后一个表达式的值.</strong></p>
+
+<pre><code>&gt;(defun our-third (x) 
+    (car (cdr (cdr x))))
+OUR-THIRD
+&gt;(our-third (a b c d))
+C
+</code></pre>
+
+<h3>2.7 Recursion</h3>
+
+<p>调用自身的函数就是递归函数.</p>
+
+<p>举例,鉴定 obj 是否为 list 的某个元素.</p>
+
+<pre><code>(defun our-member (obj lst)
+    (if (null lst))
+        nil
+        (if (eql (car lst) obj)
+            lst
+            (our-member obj (cdr lst)))))
+</code></pre>
+
+<h4>函数 eq 和 eql</h4>
+
+<p>eq 表示是否是同一个东西.</p>
+
+<p>eql 表示值是否相同.</p>
+
+<h3>2.8 reading Lisp</h3>
+
+<p>lisp 程序因为很多括号变得难读,所以我们采取合适的缩进展现一定的逻辑.</p>
+
+<h3>2.9 Input and Output</h3>
+
+<h4>标准输出函数 format.</h4>
+
+<p>format 一般由至少两个参数,第一个表示输出地点(一般 t 表示控制台),第二个参数是字符串模板(~A表示需要被后面的参数填充,~%表示换行),后面的参数是模板的参数.</p>
+
+<pre><code>&gt;(format t "~A plus ~A equals ~A.~%" 2 3 (+ 2 3))
+2 plus 3 equals 5
+NIL (函数返回值)
+</code></pre>
+
+<h4>标准输入函数 read</h4>
+
+<p>read 本身是一个 lisp 解析器,返回一个解析出来的 lisp 对象,而不是单纯的字符串.</p>
+
+<p>read 函数若没有参数表示控制台输入.</p>
+
+<p>最好在 read 前输出提示,否则 read 会一直等待输入.</p>
+
+<pre><code>&gt;(defun ask (string)
+    (format t "~A" string)
+    (read))
+&gt;(ask "how old are u? ")
+how old are u? 29
+29(由 read 解析出来的整数29)
+</code></pre>
+
+<h3>2.10 Variables</h3>
+
+<h4>操作符 let</h4>
+
+<p>let 可以帮助引入局部变量.
+举例如下</p>
+
+<pre><code>&gt;(let ((x 1) (y 2))
+    (+ x y)
+    (- x y))
+-1
+</code></pre>
+
+<p>let表达式包含两个部分.第一个部分是包含形如(var exp)列表的列表.第二部分是一系列顺序执行的表达式.返回最后一个表达式的值.</p>
+
+<h4>函数 defparameter</h4>
+
+<p>let 创建局部变量,defparameter 创建全局变量,全局变量全局可见,除非局部变量和全局变量重名,为了防止以外,我们约定全局变量形如<code>*global-var*</code></p>
+
+<pre><code>&gt;(defparameter *glob* (+ 1 98)))
+*GLOB*
+&gt;*glob*
+99
+</code></pre>
+
+<h4>函数 defconstant</h4>
+
+<p>常量全局可见,不允许局部变量个全局变量和常量重名.</p>
+
+<pre><code>&gt;(defconstant limit (+ *glob* 1))
+LIMIT
+&gt;limit
+100
+</code></pre>
+
+<h4>函数 boundp</h4>
+
+<p>用函数 boundp 检查参数是否全局</p>
+
+<pre><code>&gt;(boundp '*glob*)
+T
+</code></pre>
+
+<h3>2.11 Assignment</h3>
+
+<h4>函数 setf</h4>
+
+<p>setf 可以对变量进行赋值</p>
+
+<pre><code>&gt;(let ((n 10))
+    (setf n 2))
+2
+</code></pre>
+
+<p><strong>注意</strong>:</p>
+
+<ol>
+<li>若 setf 的第一个参数符号之前未曾出现,那么这个符号就是全局的一个变量.(隐式.)</li>
+<li>setf 的第一个参数也可以是一个表达式.</li>
+<li>setf 接受偶数个参数.逐对进行赋值.</li>
+</ol>
+
+
+<pre><code class="">&gt;(setf a 1 b 2 c (list 'a 'b 'c))
+(A B C)
+</code></pre>
+
+<h3>2.12 Functional Programming</h3>
+
+<blockquote><p>Functional programming means writing programs that work >by returning values, instead of by modifying things.It >is the dominant paradigm in Lisp. Most built-in Lisp >functions are meant to be called for the values they >return, not for side-effects.</p></blockquote>
+
+<p>函数式编程是 lisp 的主要编程范式.而函数时编程的主要思想是通过返回值编程而不是修改值编程.(没有副作用).
+函数式编程的几篇文章:)</p>
+
+<ol>
+<li><a href="http://">函数式编程初探</a></li>
+</ol>
+
+
+<h4>函数 remove</h4>
+
+<p>remove 接受两个参数,obj list1.返回不包含 obj 的 list2.(list1不受影响.)</p>
+
+<pre><code>&gt;(setf list1 '(a p p l e))
+(A P P L E)
+&gt;(remove 'p list1)
+(A L E)
+&gt;list1
+(A P P L E)
+</code></pre>
+
+<p>如果真想删除,可以采取赋值的方式</p>
+
+<pre><code>(setf x (remove 'a x))
+</code></pre>
+
+<p>函数式编程:副作用越少越好.
+其中的一个好处是可以允许交互式测试.(因为没有副作用)那么代码的正确与否可以得到及时的检验,这对开发来说十分有利,及时的反馈增加信心,且降低了 debug 的成本.</p>
+
+<h3>2.13 Iteration</h3>
+
+<p>如果想要重复的做一件事,可以采用下面的方式.</p>
+
+<pre><code>&gt;(def show-squares (start end)
+    (do ((i start (+ i 1)))
+        ((&gt; i end ) 'done)
+        (format t "~A ~A ~%" i (* i i))))
+SHOW-SQUARES
+&gt;(show-squrars 2 3)
+2 4
+3 9
+DONE
+</code></pre>
+
+<h4>marco do</h4>
+
+<p>do 用于迭代操作(循环操作).</p>
+
+<p>do 和 let 一样可以创建局部变量,do 接受至少三个参数.</p>
+
+<pre><code>(do ((var init update) ...))
+    (test-exp exp ...)
+    exp ...)
+</code></pre>
+
+<p>第一个是包含形如(var initital update)列表的列表,创建局部变量,进行初始化和更新处理.</p>
+
+<p>第二个是包含至少一个 exp 的列表,第一个列表用来判断停止条件,剩余为条件为真时要执行的一系列 exp.</p>
+
+<p>剩余为条件为假时需要执行的一系列 exp.</p>
+
+<p>最后返回最后执行的 exp 的值.</p>
+
+<h4>progn</h4>
+
+<p>我们来看一下上面 show-squares 的递归版本</p>
+
+<pre><code>(defun show-squares (i end)
+    (if (&gt; i end)
+        'done
+        (progn
+        (format t "~A ~A ~%" i (* i i))
+        (show-squares (+ i 1) end))))
+</code></pre>
+
+<p>progn 接受任一数量的表达式,依次执行.返回最后一个执行的表达式的值.</p>
+
+<h4>dolist</h4>
+
+<p>dolist 类似于 foreach.</p>
+
+<pre><code>(dolist (obj lst)
+    exp
+    exp ...)
+</code></pre>
+
+<p>dolist 的第一个参数(obj lst),表示每次迭代用 obj 代替 lst 的一个元素.
+接下来的 exp 依次执行.</p>
+
+<h3>2.14 Functions as Objects</h3>
+
+<p>在 lisp 中,function 就像普通对象一样.地位和 symbol list 字符串一样.</p>
+
+<h4>函数 function</h4>
+
+<p>接受一个函数名称,返回一个函数关联对象.可以用 <code>#'</code>来代替.</p>
+
+<pre><code>&gt;(function +)
+#&lt;SYSTEM-FUNCTION +&gt;
+&gt;#' +
+#&lt;SYSTEM-FUNCTION +&gt;
+</code></pre>
+
+<h4>函数 apply</h4>
+
+<pre><code>&gt;(apply #'+ '(1 2 3))
+6
+&gt;(apply #' 1 2 (3 4 5))
+15
+</code></pre>
+
+<p>接受一个函数参数,可以紧跟一个列表,或者只要最后一个参数是个列表,就可以紧跟任一数量的参数.</p>
+
+<h4>函数 funcall</h4>
+
+<pre><code>&gt;(funcall #' 1 2 3)
+6
+</code></pre>
+
+<p>和 apply 做相同的事,只不过参数不用以列表的形式展现.</p>
+
+<h4>lambda expression</h4>
+
+<p>并不是所有的函数斗有必要有个名字.</p>
+
+<pre><code>&gt;(lambda (arg ...) exp ...) // lambada表达式的形式.
+&gt;((lambda (x) (+ x 100)) 1) // 按照普通的函数调用
+101
+&gt;(funcall #'(lambda (x) (+ x 100)) 1) //funcall调用
+101
+</code></pre>
+
+<h3>2.15 Types</h3>
+
+<p><strong>在 lisp 中,变量没有类型,而值有类型.</strong>并且 lisp 的对象有一个树状的 type 类型.比如,27同时是 fixnum,integer,rational,real,number,atom,t.(注意从左到右,越泛化.)</p>
+
+<h4>函数 typep</h4>
+
+<pre><code>&gt;(typep 27 'integer)
+T
+</code></pre>
+
+<h3>总结</h3>
+
+<ol>
+<li>Lisp is an interactive language. If you type an expression into the toplevel, Lisp will display its value.2. Lisp programs consist of expressions. An expression can be an <strong>atom</strong>, or a <strong>list</strong> of an operator followed by zero or more arguments. Prefix syntax means that operators can take any number of arguments.3. The evaluation rule for Common Lisp function calls: evaluate the arguments left to right, and pass them to the function denoted by the operator. The quote operator has its own evaluation rule, which is to return the argument unchanged.</li>
+<li>Along with the usual <strong>data type</strong>s, Lisp has <strong>symbols</strong> and <strong>lists</strong>. Because Lisp programs are expressed as lists, it's easy to write programs that write programs.</li>
+<li>The three basic list functions are <strong>cons</strong>, which builds a list; <strong>car</strong>, which returns the first element; and <strong>cdr</strong>, which returns everything after the first element.</li>
+<li>In Common Lisp, <strong>t</strong> represents true and <strong>nil</strong> represents false. In a logical context, anything except nil counts as true. The basic conditional is <strong>if</strong>. The <strong>and</strong> and <strong>or</strong> operators resemble conditionals.</li>
+<li>Lisp consists mainly of functions. You can define new ones with <strong>defun</strong>.</li>
+<li><p>A function that calls itself is <strong>recursive</strong>. A recursive function should be considered as a process rather than a machine.9. Parentheses are not an issue, because programmers read and write Lisp by <strong>indentation</strong>.10. The basic I/O functions are <strong>read</strong>, which includes a complete Lisp parser, and <strong>format</strong>, which generates output based on templates.</p></li>
+<li><p>You can create new local variables with <strong>let</strong> , and global variables with <strong>defparameter</strong>.(用 <strong>defconstant</strong> 创建常数)12. The assignment operator is <strong>setf</strong> . Its first argument can be an expression.13. <strong>Functional programming</strong>, which means <strong>avoiding side-effects</strong>, is the dominant paradigm in Lisp.14. The basic iteration operator is <strong>do</strong>.15. Functions are regular Lisp objects. They can be passed as arguments, and denoted by lambda expressions.16. In Lisp, <strong>values have types, not variables</strong>.</p></li>
+</ol>
+
